@@ -15,8 +15,12 @@ export default function Content() {
             </div>
             <p>Author: your</p>
             <div className="card-actions justify-end">
-              <button className="btn btn-sm bg-red-500">Delete</button>
-              <button className="btn btn-sm bg-blue-500">Edit</button>
+              <button className="btn btn-sm bg-red-500 hover:bg-red-700">
+                Delete
+              </button>
+              <button className="btn btn-sm bg-blue-500 hover:bg-blue-600">
+                Edit
+              </button>
             </div>
           </div>
         </div>

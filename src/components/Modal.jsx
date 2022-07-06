@@ -10,7 +10,7 @@ export default function Modal() {
 
   return (
     <>
-      <label onClick={toggleModal} className="btn">
+      <label onClick={toggleModal} className="btn btn-primary">
         Add Manga
       </label>
 
@@ -50,7 +50,10 @@ export default function Modal() {
                 placeholder="Year"
               />
             </div>
-            <button type="submit" className="btn btn-md bg-blue-500">
+            <button
+              type="submit"
+              className="btn btn-md bg-blue-500 hover:bg-blue-600"
+            >
               Submit
             </button>
           </form>

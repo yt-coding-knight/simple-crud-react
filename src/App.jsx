@@ -1,8 +1,12 @@
+import Content from "./components/Content";
+import Navbar from "./components/Navbar";
+
 function App() {
   return (
-    <div>
-      <h1 className="text-purple-500">Hello WOrld</h1>
-    </div>
+    <>
+      <Navbar />
+      <Content />
+    </>
   );
 }
 

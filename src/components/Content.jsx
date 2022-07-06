@@ -6,7 +6,7 @@ export default function Content() {
       <div className="pt-8 pl-8">
         <Modal />
       </div>
-      <section className="p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+      <section className="p-8 grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
         <div className="card shadow-md">
           <div className="card-body">
             <div className="card-title items-start flex-col">

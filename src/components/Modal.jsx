@@ -1,11 +1,74 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Input from "./Input";
 
-export default function Modal() {
+export default function Modal({
+  setManga,
+  isActive,
+  setActive,
+  dataEdit,
+  setDataEdit,
+}) {
   const [modal, setModal] = useState("");
+  const [inputs, setInputs] = useState({});
 
   function toggleModal() {
     setModal((val) => (val === "modal-open" ? "" : "modal-open"));
+    setActive(false);
+    if (!isActive) {
+      setInputs({});
+    }
+  }
+
+  function handleInput(e) {
+    const name = e.target.name;
+    const value = e.target.value;
+
+    setInputs((val) => ({
+      ...val,
+      [name]: value,
+    }));
+  }
+
+  useEffect(() => {
+    if (isActive) {
+      setInputs(dataEdit[0]);
+      return toggleModal();
+    }
+    return;
+  }, [isActive]);
+
+  function handleSubmit(e) {
+    e.preventDefault();
+
+    if (dataEdit.length > 0) {
+      setManga((val) => {
+        const index = val.findIndex((item) => item.id === dataEdit[0].id);
+        const newValue = {
+          id: inputs.id,
+          title: inputs.title,
+          author: inputs.author,
+          year: inputs.year,
+        };
+        val[index] = newValue;
+        return val;
+      });
+      setDataEdit("");
+      return setModal("");
+    }
+    setManga((old) => {
+      return [
+        ...old,
+        {
+          id: +new Date(),
+          title: inputs.title,
+          author: inputs.author,
+          year: inputs.year,
+        },
+      ];
+    });
+
+    setInputs("");
+    setModal("");
   }
 
   return (
@@ -22,13 +85,13 @@ export default function Modal() {
           >
             ✕
           </label>
-          <form className="pt-6 space-y-6">
+          <form onSubmit={handleSubmit} className="pt-6 space-y-6">
             <div className="form-control">
               <Input
                 type="text"
                 name="title"
-                onChange={""}
-                value={""}
+                onChange={handleInput}
+                value={inputs.title || ""}
                 placeholder="Title"
               />
             </div>
@@ -36,8 +99,8 @@ export default function Modal() {
               <Input
                 type="text"
                 name="author"
-                onChange={""}
-                value={""}
+                onChange={handleInput}
+                value={inputs.author || ""}
                 placeholder="Author"
               />
             </div>
@@ -45,8 +108,8 @@ export default function Modal() {
               <Input
                 type="text"
                 name="year"
-                onChange={""}
-                value={""}
+                onChange={handleInput}
+                value={inputs.year || ""}
                 placeholder="Year"
               />
             </div>

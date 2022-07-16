@@ -1,4 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import {
+  addManga,
+  deleteFile,
+  updateManga,
+  uploadFile,
+} from "../util/dataManga";
 import Input from "./Input";
 
 export default function Modal({
@@ -7,9 +13,13 @@ export default function Modal({
   setActive,
   dataEdit,
   setDataEdit,
+  isLoading,
+  setLoading,
 }) {
   const [modal, setModal] = useState("");
   const [inputs, setInputs] = useState({});
+  const [imgPreview, setImgPreview] = useState("");
+  const inputFile = useRef(null);
 
   function toggleModal() {
     setModal((val) => (val === "modal-open" ? "" : "modal-open"));
@@ -17,6 +27,11 @@ export default function Modal({
     if (!isActive) {
       setInputs({});
     }
+  }
+
+  function handleFile() {
+    const imgPath = URL.createObjectURL(inputFile.current.files[0]);
+    setImgPreview(imgPath);
   }
 
   function handleInput(e) {
@@ -37,38 +52,45 @@ export default function Modal({
     return;
   }, [isActive]);
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
 
+    setLoading(true);
     if (dataEdit.length > 0) {
+      const newValue = {
+        title: inputs.title,
+        author: inputs.author,
+        year: inputs.year,
+        imgUrl: dataEdit[0].imgUrl,
+        createdAt: dataEdit[0].createdAt,
+      };
+      if (inputFile.current.value) {
+        const [_, imgUrl] = await Promise.all([
+          deleteFile(dataEdit[0].imgUrl),
+          uploadFile(inputFile.current.files[0]),
+        ]);
+        newValue.imgUrl = imgUrl;
+        inputFile.current.value = "";
+        setImgPreview("");
+      }
+      await updateManga(dataEdit[0].id, newValue);
       setManga((val) => {
         const index = val.findIndex((item) => item.id === dataEdit[0].id);
-        const newValue = {
-          id: inputs.id,
-          title: inputs.title,
-          author: inputs.author,
-          year: inputs.year,
-        };
-        val[index] = newValue;
+        val[index] = { id: dataEdit[0].id, ...newValue };
         return val;
       });
+      setLoading(false);
       setDataEdit("");
       return setModal("");
     }
-    setManga((old) => {
-      return [
-        ...old,
-        {
-          id: +new Date(),
-          title: inputs.title,
-          author: inputs.author,
-          year: inputs.year,
-        },
-      ];
-    });
+    const imgUrl = await uploadFile(inputFile.current.files[0]);
+    await addManga(inputs, imgUrl);
 
+    inputFile.current.value = "";
+    setImgPreview("");
+    setLoading(false);
     setInputs("");
-    setModal("");
+    return setModal("");
   }
 
   return (
@@ -113,7 +135,14 @@ export default function Modal({
                 placeholder="Year"
               />
             </div>
+            <div className="form-control">
+              <input type="file" onChange={handleFile} ref={inputFile} />
+            </div>
+            {imgPreview.length > 0 && (
+              <img className="h-52" src={imgPreview} alt="preview" />
+            )}
             <button
+              disabled={isLoading}
               type="submit"
               className="btn btn-md bg-blue-500 hover:bg-blue-600"
             >

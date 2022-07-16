@@ -1,17 +1,30 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import {
+  deleteFile,
+  deleteManga,
+  getManga,
+  getSingleManga,
+} from "../util/dataManga";
 import Modal from "./Modal";
 
 export default function Content() {
   const [manga, setManga] = useState([]);
   const [dataEdit, setDataEdit] = useState("");
   const [isActive, setActive] = useState(false);
+  const [isLoading, setLoading] = useState(false);
 
-  function rmManga(id) {
+  useEffect(() => {
+    getManga(setManga);
+    return;
+  }, [isLoading]);
+
+  async function rmManga(id, imgUrl) {
+    await Promise.all([deleteFile(imgUrl), deleteManga(id)]);
     setManga((val) => val.filter((item) => item.id !== id));
   }
 
-  function upManga(id) {
-    const singleManga = manga.filter((item) => item.id === id);
+  async function upManga(id) {
+    const singleManga = [await getSingleManga(id)];
     setDataEdit(singleManga);
     setActive(true);
   }
@@ -25,11 +38,16 @@ export default function Content() {
           setActive={setActive}
           dataEdit={dataEdit}
           setDataEdit={setDataEdit}
+          isLoading={isLoading}
+          setLoading={setLoading}
         />
       </div>
       <section className="p-8 grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
         {manga?.map((item) => (
           <div key={item.id} className="card shadow-md">
+            <figure className="relative max-h-52 overflow-hidden">
+              <img src={item.imgUrl} alt="cover" />
+            </figure>
             <div className="card-body">
               <div className="card-title items-start flex-col">
                 <h1>{item.title}</h1>
@@ -38,7 +56,7 @@ export default function Content() {
               <p>Author: {item.author}</p>
               <div className="card-actions justify-end">
                 <button
-                  onClick={() => rmManga(item.id)}
+                  onClick={() => rmManga(item.id, item.imgUrl)}
                   className="btn btn-sm bg-red-500 hover:bg-red-700"
                 >
                   Delete
